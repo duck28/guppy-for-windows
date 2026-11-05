@@ -222,7 +222,7 @@ fn unpack_ffmpeg(archive: &Path, folder: &Path) -> Result<(), String> {
     let mut found = false;
     for index in 0..zip.len() {
         let mut entry = zip.by_index(index).map_err(|e| e.to_string())?;
-        let name = entry.name().replace('\\', "/");
+        let name = entry.name().map_err(|e| e.to_string())?.replace('\\', "/");
         let Some(file_name) = ["ffmpeg.exe", "ffprobe.exe"].into_iter().find(|f| name.ends_with(&format!("/bin/{f}"))) else {
             continue;
         };
@@ -310,4 +310,50 @@ pub async fn run(mut command: Command, cancelled: Arc<AtomicBool>,
     }
     let status = child.wait().await.map_err(|e| e.to_string())?;
     Ok((status.success(), errors))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+    use zip::write::SimpleFileOptions;
+
+    fn write_zip(path: &Path, entries: &[(&str, &[u8])]) {
+        let mut writer = zip::ZipWriter::new(std::fs::File::create(path).unwrap());
+        let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Deflated);
+        for (name, data) in entries {
+            writer.start_file(*name, options).unwrap();
+            writer.write_all(data).unwrap();
+        }
+        writer.finish().unwrap();
+    }
+
+    #[test]
+    fn unpacks_ffmpeg_and_ffprobe_from_the_bin_folder() {
+        let folder = std::env::temp_dir().join(format!("guppy-unpack-{}", std::process::id()));
+        std::fs::create_dir_all(&folder).unwrap();
+        let archive = folder.join("ffmpeg.zip");
+        write_zip(&archive, &[
+            ("ffmpeg-master-latest-win64-gpl/LICENSE.txt", b"license"),
+            ("ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe", b"ffmpeg binary"),
+            ("ffmpeg-master-latest-win64-gpl/bin/ffprobe.exe", b"ffprobe binary"),
+            ("ffmpeg-master-latest-win64-gpl/doc/ffmpeg.exe", b"not this one"),
+        ]);
+        unpack_ffmpeg(&archive, &folder).unwrap();
+        assert_eq!(std::fs::read(folder.join("ffmpeg.exe")).unwrap(), b"ffmpeg binary");
+        assert_eq!(std::fs::read(folder.join("ffprobe.exe")).unwrap(), b"ffprobe binary");
+        let _ = std::fs::remove_dir_all(&folder);
+    }
+
+    #[test]
+    fn reports_an_archive_without_ffmpeg() {
+        let folder = std::env::temp_dir().join(format!("guppy-unpack-empty-{}", std::process::id()));
+        std::fs::create_dir_all(&folder).unwrap();
+        let archive = folder.join("ffmpeg.zip");
+        write_zip(&archive, &[("readme.txt", b"nothing here")]);
+        assert!(unpack_ffmpeg(&archive, &folder).is_err());
+        std::fs::write(folder.join("broken.zip"), b"not a zip").unwrap();
+        assert!(unpack_ffmpeg(&folder.join("broken.zip"), &folder).is_err());
+        let _ = std::fs::remove_dir_all(&folder);
+    }
 }
