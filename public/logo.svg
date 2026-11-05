@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF9A2E"/>
+      <stop offset="1" stop-color="#F25A00"/>
+    </linearGradient>
+    <linearGradient id="tail" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FF7410"/>
+      <stop offset="1" stop-color="#FFB54A"/>
+    </linearGradient>
+    <linearGradient id="fin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFC56B"/>
+      <stop offset="1" stop-color="#FF8A1F"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fan tail with a soft wavy edge -->
+  <path d="M276 256 C318 214 360 140 420 92 C446 108 458 126 470 150 C492 186 504 220 500 256 C504 292 492 326 470 362 C458 386 446 404 420 420 C360 372 318 298 276 256 Z" fill="url(#tail)"/>
+  <g fill="#FFFFFF" fill-opacity="0.55">
+    <circle cx="420" cy="196" r="13"/>
+    <circle cx="452" cy="256" r="11"/>
+    <circle cx="420" cy="316" r="13"/>
+    <circle cx="372" cy="232" r="8"/>
+    <circle cx="372" cy="280" r="8"/>
+  </g>
+
+  <!-- Dorsal and belly fins -->
+  <path d="M186 186 C206 140 254 118 304 124 C294 162 270 192 238 204 Z" fill="url(#fin)"/>
+  <path d="M206 322 C214 352 236 372 264 374 C262 350 250 332 232 322 Z" fill="url(#fin)"/>
+
+  <!-- Body -->
+  <path d="M36 262 C36 210 104 178 188 178 C248 178 290 206 312 256 C290 306 248 334 188 334 C104 334 36 312 36 262 Z" fill="url(#body)"/>
+  <path d="M146 212 C132 238 132 282 146 306" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="9" stroke-linecap="round" fill="none"/>
+
+  <!-- Eye -->
+  <circle cx="96" cy="244" r="22" fill="#FFFFFF"/>
+  <circle cx="91" cy="246" r="11" fill="#2B1405"/>
+  <circle cx="87" cy="241" r="4" fill="#FFFFFF"/>
+</svg>
